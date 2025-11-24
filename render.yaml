@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: keycloak
+    image: quay.io/keycloak/keycloak:latest
+    region: singapore
+    plan: free
+    envVars:
+      - key: KC_DB
+        value: postgres
+      - key: KC_DB_URL
+        value: ${keycloak-db.url}
+      - key: KC_DB_USERNAME
+        value: ${keycloak-db.user}
+      - key: KC_DB_PASSWORD
+        value: ${keycloak-db.password}
+      - key: KEYCLOAK_ADMIN
+        value: admin
+      - key: KEYCLOAK_ADMIN_PASSWORD
+        value: admin
+      - key: KC_HOSTNAME
+        value: ${keycloak.url}
+      - key: KC_HOSTNAME_STRICT_BACKCHANNEL
+        value: "false"
+    ports:
+      - port: 8080
+        name: http
+    healthCheckPath: /health/ready
+    disk:
+      name: keycloak-data
+      mountPath: /opt/keycloak/data
+      sizeGB: 10
+  - type: web
+    name: keycloak-db
+    image: postgres:16
+    region: singapore
+    plan: free
+    envVars:
+      - key: POSTGRES_DB
+        value: keycloak
+      - key: POSTGRES_USER
+        value: keycloak
+      - key: POSTGRES_PASSWORD
+        value: 12345
+    disk:
+      name: postgres-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 10
